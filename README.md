@@ -1,28 +1,26 @@
-### HelpDesk API (Suporte Técnico)
+### EventPass API (Gestão de Eventos)
 
-**Cenário:** Um sistema de abertura de chamados para TI (Tickets).
-**Desafio de Lógica:** Fluxo de Status e Prioridade.
+**Cenário:** Um sistema para gerenciar pequenos shows, workshops ou palestras e seus participantes.
+**Desafio de Lógica:** Controle de Capacidade (Vagas).
 
 #### 🗄️ Entidades (Banco de Dados)
-* **Tecnicos:** `id`, `nome`, `especialidade` (Redes, Hardware, Software).
-* **Chamados:** `id`, `titulo`, `descricao`, `prioridade` (Alta/Media/Baixa), `status` (Aberto, Em Andamento, Fechado), `tecnico_id` (FK).
+* **Eventos:** `id`, `nome`, `data`, `capacidade_maxima`, `local`.
+* **Participantes:** `id`, `nome`, `email`, `evento_id` (FK).
 
 #### 🔌 Requisitos Funcionais (Endpoints)
 
-* `POST /chamados`
-    * Abre um chamado novo.
-    * **Regra de Negócio:** O `status` nasce sempre como "Aberto" e o `tecnico_id` como `NULL`.
+* `POST /eventos`
+    * Criar um evento definindo quantas pessoas cabem.
 
-* `PATCH /atribuir`
-    * Define qual técnico vai assumir o chamado.
-    * **Automação:** O `status` deve mudar automaticamente para "Em Andamento".
+* `POST /inscricao`
+    * Inscrever um participante em um evento.
+    * **Regra de Ouro:** Antes de salvar, o sistema deve verificar se o número de inscritos é menor que a `capacidade_maxima`. Se estiver lotado, retornar erro `400` ("Evento Lotado").
 
-* `PATCH /finalizar/<id>`
-    * Muda o status para "Fechado".
-    * **Regra de Ouro:** Só pode finalizar se já tiver um técnico atribuído (`tecnico_id` não for nulo).
+* `GET /eventos/<id>/participantes`
+    * Listar todos os nomes confirmados naquele evento.
 
-* `GET /chamados/prioridade/<nivel>`
-    * Filtra chamados por prioridade (ex: listar só as "Alta").
+* `DELETE /inscricao/<id>`
+    * Cancelar uma inscrição (liberando a vaga para outra pessoa).
 
-* `GET /tecnicos/<id>/tarefas`
-    * Lista quantos e quais chamados aquele técnico tem em aberto/andamento.
+* `GET /eventos/lotados`
+    * Retornar apenas os eventos que já atingiram a capacidade máxima.
